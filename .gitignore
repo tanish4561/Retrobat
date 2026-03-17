@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+
+# Local runtime/cache artifacts
+cache/
+logs/
+library_state.json
+
+# Game/emulator binaries (keep code repo lightweight)
+Roms/
+emulators/
+
+# OS/editor
+.DS_Store
+Thumbs.db

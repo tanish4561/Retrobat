@@ -1,0 +1,37 @@
+{
+  "pokémon_let’s_go,_pikachu!_[010003f003a34000][v0].nsp": {
+    "title": "Pokémon Let’s Go, Pikachu!",
+    "cover": "cache/covers/pok_mon_let_s_go_pikachu_010003f003a34000_v0.jpg",
+    "background": "cache/backgrounds/pok_mon_let_s_go_pikachu_010003f003a34000_v0.jpg"
+  },
+  "pokémon_legends_z-a_switch_nsp_base_game.nsp": {
+    "title": "Pokémon Legends Z-A",
+    "cover": "assets/covers/Legend z-a.jpg",
+    "background": "assets/backgrounds/legends z-a.jpg"
+  },
+  "pokemon_legends_arceus_[01001f5010dfa000][v0](romslab).nsp": {
+    "title": "Pokemon Legends Arceus",
+    "cover": "assets/covers/legend arcues.png",
+    "background": "assets/backgrounds/legends arcues.jpg"
+  },
+  "crash_bandicoot_-_the_wrath_of_cortex_(usa)_(beta)_(2001-09-21).cue": {
+    "title": "Crash Bandicoot – The Wrath of Cortex",
+    "cover": "cache/covers/crash_bandicoot_the_wrath_of_cortex_usa_beta_2001_09_21.jpg",
+    "background": "assets/backgrounds/crash bandicoot.jpg"
+  },
+  "dragon_quest_viii_-_journey_of_the_cursed_king_(usa).iso": {
+    "title": "Dragon Quest VIII – Journey of the Cursed King",
+    "cover": "assets/covers/Journey to the cursed king.jpg",
+    "background": "assets/backgrounds/Journey to the cursed king.jpg"
+  },
+  "god_of_war_(usa).iso": {
+    "title": "God of War",
+    "cover": "assets/covers/GOW 1.jpg",
+    "background": "cache/backgrounds/god_of_war_usa.jpg"
+  },
+  "harry_potter_and_the_chamber_of_secrets_(usa).cue": {
+    "title": "Harry Potter and the Chamber of Secrets",
+    "cover": "assets/covers/harry potter and chamber of secrets.jpg",
+    "background": "cache/backgrounds/harry_potter_and_the_chamber_of_secrets_usa.png"
+  }
+}

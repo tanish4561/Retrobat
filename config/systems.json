@@ -1,0 +1,102 @@
+{
+  "gba": {
+    "name": "Game Boy Advance",
+    "badge": "GBA",
+    "extensions": [
+      ".gba",
+      ".srl"
+    ],
+    "emulator": "visualboyadvance.exe"
+  },
+  "nds": {
+    "name": "Nintendo DS",
+    "badge": "NDS",
+    "extensions": [
+      ".nds",
+      ".dsi",
+      ".srl"
+    ],
+    "emulator": "desmume.exe"
+  },
+  "nes": {
+    "name": "Nintendo NES / Famicom",
+    "badge": "NES",
+    "extensions": [
+      ".nes",
+      ".nez",
+      ".fc",
+      ".fds"
+    ],
+    "emulator": "fceux.exe"
+  },
+  "switch": {
+    "name": "Nintendo Switch",
+    "badge": "SWITCH",
+    "extensions": [
+      ".nsp",
+      ".xci",
+      ".nsz",
+      ".xcz"
+    ],
+    "emulator": "ryujinx.exe"
+  },
+  "ps2": {
+    "name": "PlayStation 2",
+    "badge": "PS2",
+    "extensions": [
+      ".iso",
+      ".bin",
+      ".cue",
+      ".chd"
+    ],
+    "emulator": "pcsx2.exe"
+  },
+  "ps3": {
+    "name": "PlayStation 3",
+    "badge": "PS3",
+    "extensions": [
+      ".pkg",
+      ".iso",
+      ".folder"
+    ],
+    "emulator": "rpcs3.exe",
+    "folder_game": true
+  },
+  "gamecube": {
+    "name": "GameCube",
+    "badge": "GC",
+    "extensions": [
+      ".iso",
+      ".gcm"
+    ],
+    "emulator": "dolphin.exe"
+  },
+  "wii": {
+    "name": "Wii",
+    "badge": "WII",
+    "extensions": [
+      ".iso",
+      ".wbfs"
+    ],
+    "emulator": "dolphin.exe"
+  },
+  "psp": {
+    "name": "PSP",
+    "badge": "PSP",
+    "extensions": [
+      ".iso",
+      ".cso"
+    ],
+    "emulator": "ppsspp.exe"
+  },
+  "n64": {
+    "name": "Nintendo 64",
+    "badge": "N64",
+    "extensions": [
+      ".n64",
+      ".z64",
+      ".v64"
+    ],
+    "emulator": "project64.exe"
+  }
+}
