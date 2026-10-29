@@ -20,9 +20,24 @@ BRACKET_PATTERN = re.compile(r"\[[^\]]*\]")
 PAREN_PATTERN = re.compile(r"\([^\)]*\)")
 EXTRA_TAG_PATTERN = re.compile(r"\b([bhx!]|proto|beta|sample|mult\d+)\b", re.IGNORECASE)
 
+COMPOUND_SUFFIXES = (
+    ".nkit.iso",
+    ".nkit.gcz",
+    ".nkit.wbfs",
+    ".ps3",
+)
+
+
+def _basename_without_compound_suffix(filename: str) -> str:
+    lower = filename.lower()
+    for suffix in COMPOUND_SUFFIXES:
+        if lower.endswith(suffix):
+            return filename[: -len(suffix)]
+    return Path(filename).stem
+
 
 def normalize_title(filename: str) -> str:
-    name = Path(filename).stem
+    name = _basename_without_compound_suffix(filename)
     name = name.replace("_", " ").replace("*", " ").replace("-", " ")
     name = BRACKET_PATTERN.sub(" ", name)
     name = REGION_PATTERN.sub(" ", name)
@@ -95,6 +110,9 @@ class MetadataManager:
         path.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
 
     def _cache_key(self, filename: str):
+        return normalize_title(filename).lower().replace(" ", "_")
+
+    def _legacy_cache_key(self, filename: str):
         return filename.lower().replace(" ", "_")
 
     def get_custom_overrides(self):
@@ -103,29 +121,39 @@ class MetadataManager:
 
     def save_custom_override(self, filename: str, updates: dict):
         key = self._cache_key(filename)
+        legacy_key = self._legacy_cache_key(filename)
         with self._lock:
             custom = self._load_json(self.custom_file)
-            entry = custom.get(key, {})
+            entry = dict(custom.get(legacy_key, {}))
+            entry.update(custom.get(key, {}))
             for k, v in updates.items():
                 if v:
                     entry[k] = v
             custom[key] = entry
+            if legacy_key != key:
+                custom[legacy_key] = dict(entry)
             self._save_json(self.custom_file, custom)
 
     def get_cached_metadata(self, filename: str):
         key = self._cache_key(filename)
+        legacy_key = self._legacy_cache_key(filename)
         with self._lock:
             games = self._load_json(self.games_cache_file)
             custom = self._load_json(self.custom_file)
-        merged = dict(games.get(key, {}))
+        merged = dict(games.get(legacy_key, {}))
+        merged.update(custom.get(legacy_key, {}))
+        merged.update(games.get(key, {}))
         merged.update(custom.get(key, {}))
         return merged
 
     def save_cached_metadata(self, filename: str, metadata: dict):
         key = self._cache_key(filename)
+        legacy_key = self._legacy_cache_key(filename)
         with self._lock:
             games = self._load_json(self.games_cache_file)
             games[key] = metadata
+            if legacy_key != key:
+                games[legacy_key] = metadata
             self._save_json(self.games_cache_file, games)
 
     def _request_with_retry(self, url, timeout=5, attempts=3):
@@ -156,6 +184,18 @@ class MetadataManager:
             return "GBA"
         if "nintendo ds" in lower or "nds" in lower:
             return "NDS"
+        if "gamecube" in lower or re.search(r"\bgc\b", lower):
+            return "GameCube"
+        if lower == "wii" or " nintendo wii" in lower or "gamecube / wii" in lower:
+            return "Wii"
+        if "playstation 3" in lower or "ps3" in lower:
+            return "PS3"
+        if "psp" in lower:
+            return "PSP"
+        if "nintendo 64" in lower or "n64" in lower:
+            return "N64"
+        if "nes" in lower:
+            return "NES"
         return "All"
 
     def _build_fallback_queries(self, normalized_title: str, system_name: str):
@@ -163,7 +203,14 @@ class MetadataManager:
         candidates = [normalized_title]
         if system_label:
             candidates.append(f"{normalized_title} {system_label}")
-        candidates.append(f"{normalized_title} Nintendo")
+            short_label = re.sub(r"[^a-z0-9]+", " ", system_label.lower()).strip()
+            if short_label and short_label not in system_label.lower():
+                candidates.append(f"{normalized_title} {short_label}")
+        if "playstation" in (system_label or "").lower():
+            candidates.append(f"{normalized_title} PS")
+        if any(token in (system_label or "").lower() for token in ("gamecube", "wii", "nintendo")):
+            candidates.append(f"{normalized_title} Nintendo")
+        candidates.append(f"{normalized_title} rom")
         # Preserve order and uniqueness
         out = []
         seen = set()

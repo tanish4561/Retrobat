@@ -57,9 +57,17 @@
     "extensions": [
       ".pkg",
       ".iso",
+      ".bin",
+      ".cue",
+      ".ps3",
       ".folder"
     ],
-    "emulator": "rpcs3.exe",
+    "emulator": [
+      "rpcs3-qt.exe",
+      "rpcs3.exe",
+      "RPCS3.exe",
+      "RPCS3 - Shortcut.lnk"
+    ],
     "folder_game": true
   },
   "gamecube": {
@@ -67,18 +75,36 @@
     "badge": "GC",
     "extensions": [
       ".iso",
-      ".gcm"
+      ".gcm",
+      ".gcz",
+      ".ciso",
+      ".rvz",
+      ".nkit.iso",
+      ".nkit.gcz"
     ],
-    "emulator": "dolphin.exe"
+    "emulator": [
+      "Dolphin.exe - Shortcut.lnk",
+      "Dolphin - Shortcut.lnk",
+      "dolphin.exe"
+    ]
   },
   "wii": {
     "name": "Wii",
     "badge": "WII",
     "extensions": [
       ".iso",
-      ".wbfs"
+      ".wbfs",
+      ".gcz",
+      ".ciso",
+      ".rvz",
+      ".nkit.iso",
+      ".nkit.wbfs"
     ],
-    "emulator": "dolphin.exe"
+    "emulator": [
+      "Dolphin.exe - Shortcut.lnk",
+      "Dolphin - Shortcut.lnk",
+      "dolphin.exe"
+    ]
   },
   "psp": {
     "name": "PSP",

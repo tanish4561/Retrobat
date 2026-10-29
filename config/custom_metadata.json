@@ -33,5 +33,9 @@
     "title": "Harry Potter and the Chamber of Secrets",
     "cover": "assets/covers/harry potter and chamber of secrets.jpg",
     "background": "cache/backgrounds/harry_potter_and_the_chamber_of_secrets_usa.png"
+  },
+  "blood_will_tell_-_tezuka_osamu's_dororo_(usa).iso": {
+    "title": "Blood Will Tell Tezuka Osamu's Dororo",
+    "background": "Coverpage/dororo.jpeg"
   }
 }

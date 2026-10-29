@@ -72,21 +72,21 @@ DEFAULT_SYSTEMS_CONFIG = {
     "ps3": {
         "name": "PlayStation 3",
         "badge": "PS3",
-        "extensions": [".pkg", ".iso", ".folder"],
-        "emulator": "rpcs3.exe",
+        "extensions": [".pkg", ".iso", ".bin", ".cue", ".ps3", ".folder"],
+        "emulator": ["rpcs3-qt.exe", "rpcs3.exe", "RPCS3.exe", "RPCS3 - Shortcut.lnk"],
         "folder_game": True,
     },
     "gamecube": {
         "name": "GameCube",
         "badge": "GC",
-        "extensions": [".iso", ".gcm"],
-        "emulator": "dolphin.exe",
+        "extensions": [".iso", ".gcm", ".gcz", ".ciso", ".rvz", ".nkit.iso", ".nkit.gcz"],
+        "emulator": ["Dolphin.exe - Shortcut.lnk", "Dolphin - Shortcut.lnk", "dolphin.exe"],
     },
     "wii": {
         "name": "Wii",
         "badge": "WII",
-        "extensions": [".iso", ".wbfs"],
-        "emulator": "dolphin.exe",
+        "extensions": [".iso", ".wbfs", ".gcz", ".ciso", ".rvz", ".nkit.iso", ".nkit.wbfs"],
+        "emulator": ["Dolphin.exe - Shortcut.lnk", "Dolphin - Shortcut.lnk", "dolphin.exe"],
     },
     "psp": {
         "name": "PSP",
@@ -155,6 +155,28 @@ def build_extension_index(systems_defs):
         for ext in cfg.get("extensions", []):
             ext_index.setdefault(ext.lower(), []).append(sid)
     return ext_index
+
+
+def get_candidate_system_ids(file_path):
+    filename = file_path.name.lower()
+    matches = []
+    for ext, sids in EXTENSION_INDEX.items():
+        if filename.endswith(ext.lower()):
+            matches.append((len(ext), sids))
+
+    if not matches:
+        return []
+
+    matches.sort(key=lambda item: item[0], reverse=True)
+    best_len = matches[0][0]
+    candidate_ids = []
+    for ext_len, sids in matches:
+        if ext_len != best_len:
+            continue
+        for sid in sids:
+            if sid not in candidate_ids:
+                candidate_ids.append(sid)
+    return candidate_ids
 
 
 SYSTEMS_DEFS = load_systems_definitions()
@@ -287,12 +309,15 @@ class Game:
         self.ext = self.path.suffix.lower() if self.path.is_file() else ".folder"
         self.system_id = (system_id or "").lower() if system_id else None
         self.emulator = emulator
-        self.system = system_name or self.detect_system(self.ext)
         self.description = ""
 
         # Legacy metadata support
         self.meta = load_metadata(self.filename)
         self.normalized_title = normalize_title(self.filename)
+
+        cached_meta = METADATA_MANAGER.get_cached_metadata(self.filename)
+        preferred_system = system_name or cached_meta.get("system") or self.meta.get("system")
+        self.system = preferred_system or self.detect_system(self.ext)
 
         cache_meta = METADATA_MANAGER.build_initial_metadata(self.filename, self.system)
 
@@ -408,6 +433,32 @@ class GameScanner(QThread):
         if len(candidate_ids) == 1:
             return candidate_ids[0]
 
+        suffix_name = "".join(file_path.suffixes).lower()
+
+        if suffix_name in {".gcz", ".ciso", ".rvz", ".nkit.iso", ".nkit.gcz", ".nkit.wbfs", ".wbfs"}:
+            for sid in ("wii", "gamecube"):
+                if sid in candidate_ids:
+                    return sid
+
+        if suffix_name in {".gcm"}:
+            for sid in ("gamecube", "wii"):
+                if sid in candidate_ids:
+                    return sid
+
+        if suffix_name in {".pkg", ".ps3"}:
+            if "ps3" in candidate_ids:
+                return "ps3"
+
+        if suffix_name in {".bin", ".cue"}:
+            hint_text = f"{file_path.parent.name} {file_path.stem}".lower()
+            if any(token in hint_text for token in ("ps3", "playstation 3", "rpcs3")):
+                if "ps3" in candidate_ids:
+                    return "ps3"
+            if any(token in hint_text for token in ("wii", "gamecube", "gc", "dolphin")):
+                for sid in ("wii", "gamecube"):
+                    if sid in candidate_ids:
+                        return sid
+
         parent_name = file_path.parent.name.lower()
         for sid in candidate_ids:
             if sid in parent_name:
@@ -464,14 +515,12 @@ class GameScanner(QThread):
             for f in file_iter:
                 if not f.is_file():
                     continue
-                ext = f.suffix.lower()
-
-                candidate_ids = EXTENSION_INDEX.get(ext, [])
+                candidate_ids = get_candidate_system_ids(f)
                 if not candidate_ids:
                     continue
 
                 # Prefer CUE over BIN for disc images.
-                if ext == ".bin":
+                if f.name.lower().endswith(".bin"):
                     cue = f.with_suffix(".cue")
                     if cue.exists():
                         continue
@@ -951,6 +1000,15 @@ class MainWindow(QMainWindow):
         self.launch_game()
 
     def resolve_emulator_path(self, configured_exe):
+        if isinstance(configured_exe, (list, tuple, set)):
+            for item in configured_exe:
+                resolved = self.resolve_emulator_path(item)
+                if isinstance(resolved, Path) and resolved.exists():
+                    return resolved
+                if isinstance(resolved, str) and resolved and Path(resolved).exists():
+                    return Path(resolved)
+            return configured_exe[0] if configured_exe else configured_exe
+
         configured_path = Path(configured_exe)
         candidates = []
 
@@ -970,8 +1028,27 @@ class MainWindow(QMainWindow):
             EMULATORS_DIR / f"{stem} - Shortcut.lnk",
         ])
 
+        lowered = configured_path.name.lower()
+        if "dolphin" in lowered:
+            candidates.extend([
+                EMULATORS_DIR / "Dolphin.exe - Shortcut.lnk",
+                EMULATORS_DIR / "Dolphin - Shortcut.lnk",
+                EMULATORS_DIR / "Dolphin.lnk",
+            ])
+        if "rpcs3" in lowered:
+            candidates.extend([
+                EMULATORS_DIR / "rpcs3-qt.exe",
+                EMULATORS_DIR / "rpcs3.exe",
+                EMULATORS_DIR / "RPCS3.exe",
+                EMULATORS_DIR / "RPCS3 - Shortcut.lnk",
+            ])
+
         # Last resort: any shortcut starting with emulator stem
         candidates.extend(sorted(EMULATORS_DIR.glob(f"{stem}*.lnk")))
+        if "dolphin" in lowered:
+            candidates.extend(sorted(EMULATORS_DIR.glob("Dolphin*.lnk")))
+        if "rpcs3" in lowered:
+            candidates.extend(sorted(EMULATORS_DIR.glob("rpcs3*.lnk")))
 
         for cand in candidates:
             if cand.exists():

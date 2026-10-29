@@ -18,6 +18,12 @@ class RomsFunAdapter:
         "PS2": "https://romsfun.com/roms/playstation-2/",
         "GBA": "https://romsfun.com/roms/game-boy-advance/",
         "NDS": "https://romsfun.com/roms/nintendo-ds/",
+        "GameCube": "https://romsfun.com/roms/gamecube/",
+        "Wii": "https://romsfun.com/roms/wii/",
+        "PS3": "https://romsfun.com/roms/playstation-3/",
+        "PSP": "https://romsfun.com/roms/playstation-portable/",
+        "N64": "https://romsfun.com/roms/nintendo-64/",
+        "NES": "https://romsfun.com/roms/nes/",
     }
 
     SYSTEM_SLUGS = {
@@ -25,6 +31,12 @@ class RomsFunAdapter:
         "PS2": "playstation-2",
         "GBA": "game-boy-advance",
         "NDS": "nintendo-ds",
+        "GameCube": "gamecube",
+        "Wii": "wii",
+        "PS3": "playstation-3",
+        "PSP": "playstation-portable",
+        "N64": "nintendo-64",
+        "NES": "nes",
     }
 
     QUERY_REMOVE_PATTERN = re.compile(r"\[[^\]]*\]|\([^\)]*\)")
@@ -262,7 +274,7 @@ class RomsFunAdapter:
 
                 merged = []
                 seen = set()
-                for source in ("PS2", "GBA", "NDS"):
+                for source in ("PS2", "GBA", "NDS", "GameCube", "Wii", "PS3", "PSP", "N64", "NES"):
                     pages_needed = min(40, max(1, math.ceil(end_idx / 36) + 1))
                     parsed = self._collect_from_url(system=source, query=qv, pages=pages_needed)
                     for game in parsed:
